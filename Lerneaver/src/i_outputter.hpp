@@ -15,17 +15,17 @@ public:
 
 	\param[in] cfgFilePath Config file path
 	*/
-	virtual void init(const TYPE_FILESYSTEMPATH& cfgFilePath) = 0;
+	virtual void init(const config::TYPE_CONFIGID &cfgFilePath) = 0;
 
 	/**
 		Sends fuzzer buffer to right place
 
 		\param[in] par_data fuzzing data buffer
 	*/
-	virtual void output(const ByteBlob& par_data = ByteBlob{}) = 0;
+	virtual void output(const ByteBlob &par_data = ByteBlob{}) = 0;//TODO par_data may not be empty => def arg is redundant
 
 	/**
-		Deinitializes outputter
+		Deinitializes ID
 	*/
 	virtual void deinit() = 0;
 };
