@@ -18,12 +18,4 @@ using TYPE_QWORD = std::uint64_t;
 
 using TYPE_SIZE=std::size_t;
 
-#if defined PLATFORM_WINDOWS
-	using TYPE_FILESYSTEMPATH = std::wstring;
-#elif defined PLATFORM_UNIX
-	using TYPE_FILESYSTEMPATH = std::string;
-#elif defined PLATFORM_MACOS
-
-#endif
-
 #endif
