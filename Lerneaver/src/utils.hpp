@@ -7,6 +7,16 @@
 #include <mutex>
 
 #include "types.hpp"
+#include "config.hpp"
+
+//====================================================================================================
+class ExEx : public std::exception {
+
+public:
+	ExEx() = default;
+	virtual ~ExEx() {}
+	virtual std::string getInfo() const = 0;
+};
 
 //====================================================================================================
 using ByteBlob = std::vector<TYPE_BYTE>;
@@ -18,52 +28,35 @@ protected:
 	std::mutex m;
 
 public:
-	CSharedVar(const T& obj = T{}) : var(obj) {}
+	CSharedVar(const T& obj = T{}) : var(obj) {}//TODO noexcept?
+	//TODO take care bout copy-control members
+	virtual ~CSharedVar() {}
 
-	void CSharedVar::set(const T& obj) {
-		this->m.lock();
+	void set(const T& obj = T{}) {
+		std::lock_guard<std::mutex>(this->m);
 		this->var = obj;
-		this->m.unlock();
 	}
 
-	T CSharedVar::get() {
-		this->m.lock();
+	T get() {
+		std::lock_guard<std::mutex>(this->m);
 		T tmpObj = this->var;
-		this->m.unlock();
 		return tmpObj;
 	}
 };
 
 //====================================================================================================
-class ExException : public std::exception {
-public:
-	std::string msg;
-	ExException(const std::string& par_msg);
-};
+inline TYPE_SIZE getCPUCoresAmount() {
+	return std::thread::hardware_concurrency();
+}
 
+//Conversion stuff
 //====================================================================================================
-#if defined PLATFORM_WINDOWS
-#include <windows.h>
-class ExWindowsError : public ExException {
-public:
-	DWORD errorCode;
-
-	ExWindowsError(const std::string& par_msg);
-	virtual ~ExWindowsError() {}
-};
-#endif
-
-//====================================================================================================
-TYPE_SIZE getCPUCoresAmount();
-
-//Conversion
-//====================================================================================================
-std::string convertWStr2Str(const std::wstring& wstr);
+inline std::string convertWStr2Str(const std::wstring &wstr) {
+	return std::string(wstr.begin(), wstr.end());
+}
 
 //User utils
 //====================================================================================================
-void printFuzzerID(TYPE_FUZZERID fuzzerID, std::ostream& outStream) {
-	
-}
+inline void printFuzzerID(const config::TYPE_FUZZERID &fuzzerID, std::ostream &outStream) {}
 
 #endif
