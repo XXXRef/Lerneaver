@@ -1,7 +1,8 @@
-#ifndef HEADER_LOGGER
-#define HEADER_LOGGER
+#ifndef HEADER_I_LOGGER
+#define HEADER_I_LOGGER
 
 #include "utils.hpp"
+#include "config.hpp"
 
 /**
 \brief ILogger interface
@@ -13,9 +14,9 @@ public:
 	/**
 	Initializes logger object with the help of data in cfg file
 
-	\param[in] cfgFilePath Config file path
+	\param[in] cfgFileID Config ID
 	*/
-	virtual void init(const TYPE_FILESYSTEMPATH& cfgFilePath) = 0;
+	virtual void init(const config::TYPE_CONFIGID &cfgFileID) = 0;
 
 	/**
 	Logs data blob from fuzzer optionally using metadata
@@ -23,7 +24,7 @@ public:
 	\param[in] par_data fuzzing data buffer
 	\param[in] par_metadata fuzzing data buffer (optional)
 	*/
-	virtual void log(const ByteBlob& par_data = ByteBlob{}, const ByteBlob& par_metadata = ByteBlob{}) = 0;
+	virtual void log(const ByteBlob &par_data = ByteBlob{}, const ByteBlob &par_metadata = ByteBlob{}) = 0; //TODO what the fuck is metadata?
 
 	/**
 	Deinitializes logger
