@@ -12,7 +12,7 @@ Abstract class describing logger interface
 class ILogger {
 public:
 	/**
-	Initializes logger object with the help of data in cfg file
+	Initializes logger object with the help of data in cfg
 
 	\param[in] cfgFileID Config ID
 	*/

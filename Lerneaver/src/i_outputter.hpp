@@ -11,9 +11,9 @@
 class IOutputter {
 public:
 	/**
-	Initializes outputter object with the help of data in cfg file
+	Initializes outputter object with the help of data in cfg
 
-	\param[in] cfgFilePath Config file path
+	\param[in] cfgFilePath Config ID
 	*/
 	virtual void init(const config::TYPE_CONFIGID &cfgFilePath) = 0;
 

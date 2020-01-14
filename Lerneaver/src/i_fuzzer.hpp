@@ -12,9 +12,9 @@
 class IFuzzer {
 public:
 	/**
-		Initializes fuzzer object with the help of data in cfg file
+		Initializes fuzzer object with the help of data in cfg
 
-		\param[in] cfgFileID Config file ID
+		\param[in] cfgFileID Config ID
 	*/
 	
 	virtual void init(const config::TYPE_CONFIGID &cfgFileID) = 0;
