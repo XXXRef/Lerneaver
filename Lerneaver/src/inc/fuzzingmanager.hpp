@@ -12,47 +12,28 @@
 
 #include "types.hpp"
 #include "utils.hpp"
+#include "config.hpp"
 #include "i_fuzzer.hpp"
 #include "i_logger.hpp"
 #include "i_outputter.hpp"
 
-#include "ModulesStuff/modulescontainer.hpp"
+#include "fuzzermodulesmanager.hpp"
 
-#include "spdlog/spdlog.h"
-
-//====================================================================================================
-using TYPE_FUZZERID = std::wstring; //if changing this need to change user utils
-using TYPE_LOGGERID = std::wstring;
-using TYPE_OUTPUTTERID = std::wstring;
-
-//====================================================================================================
-/**
-	\brief Class that manages fuzzers/outputters modules loading/unloading by their IDs
-*/
-class CFuzzerModulesContainer {
-	CModulesContainer modulesContainer;
-	std::map<TYPE_FUZZERID, TYPE_FILESYSTEMPATH> fuzzersModules;
-	std::map<TYPE_LOGGERID, TYPE_FILESYSTEMPATH> loggersModules;
-	std::map<TYPE_OUTPUTTERID, TYPE_FILESYSTEMPATH> outputtersModules;
-
-	static const std::string fuzzerFactoryFunctionName;
-	static const std::string outputterFactoryFunctionName;
-	static const std::string loggerFactoryFunctionName;
-
-public:
-	std::shared_ptr<IFuzzer> loadFuzzerFromModule(TYPE_FUZZERID fuzzerID, const TYPE_FILESYSTEMPATH& fuzzerLibPath);
-	void unloadFuzzer(TYPE_FUZZERID fuzzerID);
-	std::shared_ptr<ILogger> loadLoggerFromModule(TYPE_LOGGERID loggerID, const TYPE_FILESYSTEMPATH& loggerLibPath);
-	void unloadLogger(TYPE_LOGGERID loggerID);
-	std::shared_ptr<IOutputter> loadOutputterFromModule(TYPE_OUTPUTTERID outputterID, const TYPE_FILESYSTEMPATH& outputterLibPath);
-	void unloadOutputter(TYPE_OUTPUTTERID fuzzerID);
-};
+#include "EXT/spdlog/spdlog.h"
 
 //====================================================================================================
 /**
 	\brief Main fuzzing framework class
 */
 class CFuzzingManager {
+public:
+	using TYPE_FUZZERID=config::TYPE_FUZZERID;
+	using TYPE_LOGGERID=config::TYPE_LOGGERID;
+	using TYPE_OUTPUTTERID=config::TYPE_OUTPUTTERID;
+	using TYPE_MODID=config::TYPE_MODID;
+	using TYPE_CONFIGID=config::TYPE_CONFIGID;
+
+private:
 	/**
 	\brief CFuzzingManager worker class performing main fuzzing business logic
 	*/
@@ -62,20 +43,20 @@ class CFuzzingManager {
 
 	private:
 		CSharedVar<EWorkerState> state;
-		CFuzzingManager* pFuzzingManager; // To access links collection
+		CFuzzingManager *pFuzzingManager; // To access links collection
 
 	public:
 
-		CWorker(CFuzzingManager* par_pFuzzingManager);
+		CWorker(CFuzzingManager *par_pFuzzingManager);
 
-		void operator()(TYPE_FUZZERID fuzzerID);
+		void operator()(const TYPE_FUZZERID &fuzzerID);
 
 		EWorkerState getState();
 		void setState(const EWorkerState&);
 	};
 
 //----------------------------------------------------------------------------------------------------
-	CFuzzerModulesContainer fuzzerModulesContainer;
+	CFuzzerModulesManager fuzzerModulesContainer;
 
 	std::map<TYPE_FUZZERID, std::shared_ptr<IFuzzer>> fuzzers;
 	std::map<TYPE_LOGGERID, std::shared_ptr<ILogger>> loggers;
@@ -85,7 +66,7 @@ class CFuzzingManager {
 	std::map<TYPE_FUZZERID, std::pair<std::unique_ptr<std::mutex>, std::list<std::shared_ptr<ILogger>>>> loggersLinks;
 	//links can be accessed by workers and by fuzzing manager itself -> use mutex
 
-	std::map < TYPE_FUZZERID, std::pair < std::shared_ptr<CWorker>, std::thread >> workers;
+	std::map <TYPE_FUZZERID, std::pair< std::shared_ptr<CWorker>, std::thread>> workers;
 
 	std::shared_ptr<spdlog::logger> pLogger;
 
@@ -95,7 +76,7 @@ public:
 	CFuzzingManager();
 
 	//Logging stuff
-	void enableLogging(const TYPE_FILESYSTEMPATH& logFilePath);
+	void enableLogging(const config::platform::TYPE_FILESYSTEMPATH &logFilePath);
 	void disableLogging();
 
 
@@ -105,9 +86,9 @@ public:
 	Note it isnt initialized.
 
 	\param[in] fuzzerID Fuzzer identifier
-	\param[in] fuzzerLibFilePath Fuzzer dynamic lib path
+	\param[in] fuzzerLibFilePath Fuzzer module ID
 	*/
-	void addFuzzer(TYPE_FUZZERID fuzzerID, const TYPE_FILESYSTEMPATH& fuzzerLibFilePath);
+	void addFuzzer(const TYPE_FUZZERID &fuzzerID, const TYPE_MODID &fuzzerModID);
 	
 	/**
 	Removes fuzzer object outa here
@@ -115,37 +96,37 @@ public:
 
 	\param[in] fuzzerID Fuzzer identifier
 	*/
-	void removeFuzzer(TYPE_FUZZERID fuzzerID);
+	void removeFuzzer(const TYPE_FUZZERID &fuzzerID);
 	
 	/**
 	Initializes fuzzer object with data from config file
 	Note it isnt initialized.
 
 	\param[in] fuzzerID Fuzzer identifier
-	\param[in] cfgFilePath Fuzzer init config file path 
+	\param[in] cfgFilePath Fuzzer init config file ID 
 	*/
-	void initFuzzer(TYPE_FUZZERID fuzzerID, const TYPE_FILESYSTEMPATH& cfgFilePath); // Init fuzzer object
+	void initFuzzer(const TYPE_FUZZERID &fuzzerID, const TYPE_CONFIGID &cfgFileID); // Init fuzzer object
 
 	/**
 	Deinitializes fuzzer object
 
 	\param[in] fuzzerID Fuzzer identifier
 	*/
-	void deinitFuzzer(TYPE_FUZZERID fuzzerID);
+	void deinitFuzzer(const TYPE_FUZZERID &fuzzerID);
 
 	/**
 	Starts fuzzing process related to selected fuzzer
 
 	\param[in] fuzzerID Fuzzer identifier
 	*/
-	void playFuzzer(TYPE_FUZZERID fuzzerID); // Create thread for fuzzer and run it. This method related to worker, not to fuzzer object
+	void playFuzzer(const TYPE_FUZZERID &fuzzerID); // Create thread for fuzzer and run it. This method related to worker, not to fuzzer object
 	
 	/**
 	Stops fuzzing process related to selected fuzzer
 
 	\param[in] fuzzerID Fuzzer identifier
 	*/
-	void stopFuzzer(TYPE_FUZZERID fuzzerID); // Finish fuzzer thread. This method related to worker, not to fuzzer object
+	void stopFuzzer(const TYPE_FUZZERID &fuzzerID); // Finish fuzzer thread. This method related to worker, not to fuzzer object
 
 // Outputter-related interface
 	/**
@@ -153,9 +134,9 @@ public:
 	Note it isnt initialized.
 
 	\param[in] outputterID Outputter identifier
-	\param[in] outputterLibFilePath Outputter dynamic lib path
+	\param[in] outputterLibFilePath Outputter module ID
 	*/
-	void addOutputter(TYPE_OUTPUTTERID outputterID, const TYPE_FILESYSTEMPATH& outputterLibFilePath);
+	void addOutputter(const TYPE_OUTPUTTERID &outputterID, const TYPE_MODID &outputterModID);
 
 	/**
 	Removes outputter object outa here
@@ -163,23 +144,23 @@ public:
 
 	\param[in] outputterID Outputter identifier
 	*/
-	void removeOutputter(TYPE_OUTPUTTERID outputterID);
+	void removeOutputter(const TYPE_OUTPUTTERID &outputterID);
 
 	/**
 	Initializes outputter object with data from config file
 	Note it isnt initialized.
 
 	\param[in] outputterID Outputter identifier
-	\param[in] cfgFilePath Outputter init config file path
+	\param[in] cfgFilePath Outputter init config ID
 	*/
-	void initOutputter(TYPE_OUTPUTTERID outputterID, const TYPE_FILESYSTEMPATH& cfgFilePath);
+	void initOutputter(const TYPE_OUTPUTTERID &outputterID, const TYPE_CONFIGID &cfgFileID);
 
 	/**
 	Deinitializes outputterID object
 
 	\param[in] outputterID Outputter identifier
 	*/
-	void deinitOutputter(TYPE_OUTPUTTERID outputterID);
+	void deinitOutputter(const TYPE_OUTPUTTERID &outputterID);
 
 //Logger-related interface
 	/**
@@ -187,17 +168,17 @@ public:
 	Note it isnt initialized.
 
 	\param[in] loggerID Logger identifier
-	\param[in] loggerLibFilePath Logger dynamic lib path
+	\param[in] loggerLibFilePath Logger module ID
 	*/
-	void addLogger(TYPE_LOGGERID loggerID, const TYPE_FILESYSTEMPATH& loggerLibFilePath);
+	void addLogger(const TYPE_LOGGERID &loggerID, const TYPE_MODID &loggerLibFilePath);
 
 	/**
-	Removes logger object outa here
+	Removes logger object outta here
 	Note it isnt initialized.
 
 	\param[in] loggerID Logger identifier
 	*/
-	void removeLogger(TYPE_LOGGERID loggerID);
+	void removeLogger(const TYPE_LOGGERID &loggerID);
 
 	/**
 	Initializes logger object with data from config file
@@ -206,14 +187,14 @@ public:
 	\param[in] loggerID Logger identifier
 	\param[in] cfgFilePath Logger init config file path
 	*/
-	void initLogger(TYPE_LOGGERID loggerID, const TYPE_FILESYSTEMPATH& cfgFilePath);
+	void initLogger(const TYPE_LOGGERID &loggerID, const TYPE_CONFIGID &cfgFilePath);
 
 	/**
 	Deinitializes loggerID object
 
 	\param[in] loggerID Logger identifier
 	*/
-	void deinitLogger(TYPE_LOGGERID loggerID);
+	void deinitLogger(const TYPE_LOGGERID &loggerID);
 
 
 // Links-related interface
@@ -223,7 +204,7 @@ public:
 	\param[in] fuzzerID Outputter identifier
 	\param[in] outputters Outputters set
 	*/
-	void setFuzzerOutputters(TYPE_FUZZERID fuzzerID, const std::list<TYPE_OUTPUTTERID>& par_outputters);
+	void setFuzzerOutputters(const TYPE_FUZZERID &fuzzerID, const std::list<TYPE_OUTPUTTERID> &par_outputters);
 
 	/**
 	Adds outputter to outputters set of selected fuzzer
@@ -231,7 +212,7 @@ public:
 	\param[in] fuzzerID Fuzzer identifier
 	\param[in] outputterID Outputter identifier to insert
 	*/
-	void addFuzzerOutputter(TYPE_FUZZERID fuzzerID, TYPE_OUTPUTTERID outputterID);
+	void addFuzzerOutputter(const TYPE_FUZZERID &fuzzerID, const TYPE_OUTPUTTERID &outputterID);
 
 	/**
 	Removes outputter from outputters set of selected fuzzer
@@ -239,7 +220,7 @@ public:
 	\param[in] fuzzerID Fuzzer identifier
 	\param[in] outputterID Outputter to remove
 	*/
-	void removeFuzzerOutputter(TYPE_FUZZERID fuzzerID, TYPE_OUTPUTTERID outputterID);
+	void removeFuzzerOutputter(const TYPE_FUZZERID &fuzzerID, const TYPE_OUTPUTTERID &outputterID);
 
 // LoggerLinks-related interface
 	/**
@@ -248,7 +229,7 @@ public:
 	\param[in] fuzzerID Outputter identifier
 	\param[in] loggers Loggers set
 	*/
-	void setFuzzerLoggers(TYPE_FUZZERID fuzzerID, const std::list<TYPE_LOGGERID>& par_loggers);
+	void setFuzzerLoggers(const TYPE_FUZZERID &fuzzerID, const std::list<TYPE_LOGGERID> &par_loggers);
 
 	/**
 	Adds logger to loggers set of selected fuzzer
@@ -256,7 +237,7 @@ public:
 	\param[in] fuzzerID Fuzzer identifier
 	\param[in] loggerID Logger identifier to insert
 	*/
-	void addFuzzerLogger(TYPE_FUZZERID fuzzerID, TYPE_LOGGERID loggerID);
+	void addFuzzerLogger(const TYPE_FUZZERID &fuzzerID, const TYPE_LOGGERID &loggerID);
 
 	/**
 	Removes logger from loggers set of selected fuzzer
@@ -264,23 +245,27 @@ public:
 	\param[in] fuzzerID Fuzzer identifier
 	\param[in] loggerID Logger to remove
 	*/
-	void removeFuzzerLogger(TYPE_FUZZERID fuzzerID, TYPE_LOGGERID loggerID);
+	void removeFuzzerLogger(const TYPE_FUZZERID &fuzzerID, const TYPE_LOGGERID &loggerID);
 
 //State-related interface
 	/**
 	Provides info about specific fuzzer
 	*/
-	std::tuple<CFuzzingManager::EWorkerState, std::vector<TYPE_LOGGERID>, std::vector<TYPE_OUTPUTTERID>> getFuzzerState(TYPE_FUZZERID fuzzerID);
+	std::tuple<CFuzzingManager::EWorkerState, std::vector<TYPE_LOGGERID>, std::vector<TYPE_OUTPUTTERID>> getFuzzerState(const TYPE_FUZZERID &fuzzerID);
 
 	/**
 	Provides overall info about current fuzzer framework state
 	*/
 	std::vector<std::tuple<TYPE_FUZZERID, EWorkerState, std::vector<TYPE_LOGGERID>, std::vector<TYPE_OUTPUTTERID> >> getState();
 
-//----------------------------------------------------------------------------------------------------
-	class ExFuzzingManager : public ExException {
+//Exceptions
+	class ExFuzzingManager : public ExEx {
+		std::string exInfo;
 	public:
-		ExFuzzingManager(const std::string& par_msg);
+		ExFuzzingManager(const std::string &par_exInfo) : exInfo(par_exInfo) {}
+		std::string getInfo() const override {
+			return std::string("[ExFuzzingManager EXCEPTION] ") + exInfo;
+		}
 	};
 };
 #endif
