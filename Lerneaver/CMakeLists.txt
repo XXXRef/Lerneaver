@@ -16,7 +16,7 @@ elseif(APPLE)
 endif()
 add_compile_definitions(${PLATFORM_ID})
 
-include_directories(./src/inc)
+include_directories(./src/inc ./src/inc/EXT)
 
 #Add all src files in src folder recursively
 file(GLOB_RECURSE SRC_FILES ./src *.cpp)
