@@ -52,7 +52,7 @@ private:
 		void operator()(const TYPE_FUZZERID &fuzzerID);
 
 		EWorkerState getState();
-		void setState(const EWorkerState&);
+		void setState(const EWorkerState &);
 	};
 
 //----------------------------------------------------------------------------------------------------
@@ -69,7 +69,8 @@ private:
 	std::map <TYPE_FUZZERID, std::pair< std::shared_ptr<CWorker>, std::thread>> workers;
 
 	std::shared_ptr<spdlog::logger> pLogger;
-
+	std::string selfLoggerID;
+	
 public:
 	using EWorkerState=CFuzzingManager::CWorker::EWorkerState;
 
