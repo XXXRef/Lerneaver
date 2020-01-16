@@ -19,7 +19,7 @@
 
 #include "fuzzermodulesmanager.hpp"
 
-#include "EXT/spdlog/spdlog.h"
+#include "spdlog/spdlog.h"
 
 //====================================================================================================
 /**
@@ -69,7 +69,9 @@ private:
 	std::map <TYPE_FUZZERID, std::pair< std::shared_ptr<CWorker>, std::thread>> workers;
 
 	std::shared_ptr<spdlog::logger> pLogger;
-	std::string selfLoggerID;
+	
+	using TYPE_MANAGERID=unsigned;
+	TYPE_MANAGERID fuzzingManagerID;
 	
 public:
 	using EWorkerState=CFuzzingManager::CWorker::EWorkerState;

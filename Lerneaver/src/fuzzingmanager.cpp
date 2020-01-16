@@ -11,13 +11,13 @@
 CFuzzingManager::CFuzzingManager() {
 	//Set logger
 	std::srand(std::time(nullptr));
-	this->selfLoggerID = std::string("logger_Lerneaver_") + std::to_string(std::rand());
+	this->fuzzingManagerID = std::rand();
 }
 
 //Logging stuff
 //====================================================================================================
 void CFuzzingManager::enableLogging(const config::platform::TYPE_FILESYSTEMPATH &logFilePath) {
-	this->pLogger = spdlog::basic_logger_st(this->selfLoggerID, logFilePath);
+	this->pLogger = spdlog::basic_logger_st(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID), logFilePath);
 	this->pLogger->set_level(spdlog::level::debug);
 }
 
@@ -26,14 +26,14 @@ void CFuzzingManager::disableLogging() {
 	this->pLogger->set_level(spdlog::level::off);
 }
 
-//---- Fuzzer-related interface
+//Fuzzer-related interface
 //====================================================================================================
 void CFuzzingManager::addFuzzer(const TYPE_FUZZERID &fuzzerID, const TYPE_MODID &fuzzerModID) {
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::addFuzzer BEGIN. fuzzerID={} fuzzerLibFilePath = {}", fuzzerID, fuzzerModID);
 	
 	//Check if given fuzzerID already exists
 	for (const auto &e: this->fuzzers) {
-		if (e.first==fuzzerID) {
+		if (e.first==fuzzerID) { //WARNING TYPE_FUZZERID must be comparable
 			this->pLogger->log(spdlog::level::err, "Given fuzzerID already in use");
 			throw ExFuzzingManager("Given fuzzerID already in use");
 		}
@@ -46,6 +46,7 @@ void CFuzzingManager::addFuzzer(const TYPE_FUZZERID &fuzzerID, const TYPE_MODID 
 		this->pLogger->log(spdlog::level::err, std::string("Failed to load fuzzer module: ")+e.getInfo());
 		throw ExFuzzingManager(e.getInfo());
 	}
+	//Add new fuzzer into data structures
 	this->fuzzers.insert({fuzzerID,pFuzzerObj });
 	this->links[fuzzerID] = { std::unique_ptr<std::mutex>(new std::mutex()),std::list<std::shared_ptr<IOutputter>>() };//TIP std::make_unique introdused in latter standards
 	this->loggersLinks[fuzzerID] = { std::unique_ptr<std::mutex>(new std::mutex()),std::list<std::shared_ptr<ILogger>>() };
@@ -62,7 +63,7 @@ void CFuzzingManager::removeFuzzer(const TYPE_FUZZERID &fuzzerID) {
 
 	//Check if given fuzzerID exists
 	bool flagFuzzerIDExists = false;
-	for (const auto& e : this->fuzzers) {
+	for (const auto &e: this->fuzzers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerIDExists = true;
 			break;
@@ -73,25 +74,25 @@ void CFuzzingManager::removeFuzzer(const TYPE_FUZZERID &fuzzerID) {
 		throw ExFuzzingManager("Fuzzer with given fuzzerID doesnt exist");
 	}
 	try{
-	this->fuzzerModulesContainer.unloadFuzzer(fuzzerID);
+		this->fuzzerModulesContainer.unloadFuzzer(fuzzerID);
 	}
-	catch (CFuzzerModulesManager::ExFuzzerModulesManager & e) {
+	catch (CFuzzerModulesManager::ExFuzzerModulesManager &e) {
 		this->pLogger->log(spdlog::level::err, std::string("Failed to unload fuzzer module: ") + e.getInfo());
 		throw ExFuzzingManager(e.getInfo());
 	}
 	//TODO Stop/deinit fuzzer?
 	this->fuzzers.erase(fuzzerID);
 	this->links.erase(fuzzerID);
+	//TODO this->loggersLinks.erase(fuzzerID);
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::removeFuzzer END");
 }
 
 //====================================================================================================
 void CFuzzingManager::initFuzzer(const TYPE_FUZZERID &fuzzerID, const TYPE_CONFIGID &cfgFileID){
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::initFuzzer BEGIN. fuzzerID={} cfgFilePath={}", fuzzerID, cfgFileID);
-	
 	//Check if given fuzzerID exists
 	bool flagFuzzerIDExists = false;
-	for (const auto& e : this->fuzzers) {
+	for (const auto &e: this->fuzzers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerIDExists = true;
 			break;
@@ -112,7 +113,7 @@ void CFuzzingManager::deinitFuzzer(const TYPE_FUZZERID &fuzzerID) {
 	
 	//Check if given fuzzerID exists
 	bool flagFuzzerIDExists = false;;
-	for (const auto& e : this->fuzzers) {
+	for (const auto &e: this->fuzzers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerIDExists = true;
 			break;
@@ -130,10 +131,9 @@ void CFuzzingManager::deinitFuzzer(const TYPE_FUZZERID &fuzzerID) {
 //====================================================================================================
 void CFuzzingManager::playFuzzer(const TYPE_FUZZERID &fuzzerID) {
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::playFuzzer BEGIN. fuzzerID={}", fuzzerID);
-	
 	//Check if given fuzzerID exists
 	bool flagFuzzerIDExists = false;
-	for (const auto& e : this->fuzzers) {
+	for (const auto &e: this->fuzzers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerIDExists = true;
 			break;
@@ -143,11 +143,10 @@ void CFuzzingManager::playFuzzer(const TYPE_FUZZERID &fuzzerID) {
 		this->pLogger->log(spdlog::level::err, "Fuzzer with given fuzzerID doesnt exist");
 		throw ExFuzzingManager("Fuzzer with given fuzzerID doesnt exist");
 	}
-	
 	//Start fuzzer thread
 	//Check if fuzzer worker  already in workers
 	bool flagFuzzerWorkerExists = false;
-	for (const auto& e : this->workers) {
+	for (const auto &e : this->workers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerWorkerExists = true;
 			break;
@@ -164,17 +163,15 @@ void CFuzzingManager::playFuzzer(const TYPE_FUZZERID &fuzzerID) {
 		std::shared_ptr<CWorker> pWorkerObj(new CWorker(this));
 		this->workers[fuzzerID] = { pWorkerObj, std::thread(std::ref(*(pWorkerObj.get())), fuzzerID) };
 	}
-
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::playFuzzer END");
 }
 
 //====================================================================================================
 void CFuzzingManager::stopFuzzer(const TYPE_FUZZERID &fuzzerID){
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::stopFuzzer BEGIN. fuzzerID={}", fuzzerID);
-
 	//Check if given fuzzerID exists
 	bool flagFuzzerIDExists = false;
-	for (const auto& e : this->fuzzers) {
+	for (const auto &e: this->fuzzers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerIDExists = true;
 			break;
@@ -184,19 +181,17 @@ void CFuzzingManager::stopFuzzer(const TYPE_FUZZERID &fuzzerID){
 		this->pLogger->log(spdlog::level::err, "Fuzzer with given fuzzerID doesnt exist");
 		throw ExFuzzingManager("Fuzzer with given fuzzerID doesnt exist");
 	}
-
 	if (EWorkerState::STOPPED == this->workers[fuzzerID].first->getState()) {//Check if fuzzer worker is in right state for playing
 		this->pLogger->log(spdlog::level::err, "This fuzzer already stopped");
 		throw ExFuzzingManager("This fuzzer already stopped");
 	}
-
 	this->workers[fuzzerID].first->setState(CWorker::EWorkerState::STOPPED);
 	this->workers[fuzzerID].second.join();
 	//this->workers.erase(fuzzerID);
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::stopFuzzer END");
 }
 
-//---- Outputter-related interface
+//Outputter-related interface
 //====================================================================================================
 void CFuzzingManager::addOutputter(const TYPE_OUTPUTTERID &outputterID, const TYPE_MODID &outputterModID) {
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::addOutputter BEGIN. outputterID={} outputterLibFilePath={}", outputterID, outputterModID);
@@ -226,7 +221,7 @@ void CFuzzingManager::removeOutputter(const TYPE_OUTPUTTERID &outputterID) {
 	
 	//Check if given outputterID exists
 	bool flagOutputterIDExists = false;
-	for (const auto& e : this->outputters) {
+	for (const auto &e: this->outputters) {
 		if (e.first == outputterID) {
 			flagOutputterIDExists = true;
 			break;
@@ -327,7 +322,7 @@ void CFuzzingManager::removeLogger(const TYPE_LOGGERID &loggerID) {
 
 	//Check if given loggerID exists
 	bool flagLoggerIDExists = false;
-	for (const auto& e : this->loggers) {
+	for (const auto &e: this->loggers) {
 		if (e.first == loggerID) {
 			flagLoggerIDExists = true;
 			break;
@@ -342,7 +337,7 @@ void CFuzzingManager::removeLogger(const TYPE_LOGGERID &loggerID) {
 	auto pLoggerObj = this->loggers[loggerID];
 	this->loggers.erase(loggerID);
 	//Remove logger from all links
-	for (auto& e : this->loggersLinks) {
+	for (auto &e: this->loggersLinks) {
 		e.second.first->lock();
 		auto iter = e.second.second.begin();
 		while (iter != e.second.second.end()) {
@@ -455,7 +450,7 @@ void CFuzzingManager::addFuzzerLogger(const TYPE_FUZZERID &fuzzerID, const TYPE_
 
 	//Check if given fuzzerID exists
 	bool flagFuzzerIDExists = false;
-	for (const auto& e : this->fuzzers) {
+	for (const auto &e: this->fuzzers) {
 		if (e.first == fuzzerID) {
 			flagFuzzerIDExists = true;
 			break;
@@ -467,7 +462,7 @@ void CFuzzingManager::addFuzzerLogger(const TYPE_FUZZERID &fuzzerID, const TYPE_
 	}
 	//Check if given loggerID exists
 	bool flagLoggerIDExists = false;
-	for (const auto& e : this->loggers) {
+	for (const auto &e: this->loggers) {
 		if (e.first == loggerID) {
 			flagLoggerIDExists = true;
 			break;
@@ -683,7 +678,7 @@ auto  CFuzzingManager::getFuzzerState(const TYPE_FUZZERID &fuzzerID) -> std::tup
 	//Get fuzzer loggers
 	std::vector<TYPE_LOGGERID> fuzzerLoggers;
 	this->loggersLinks[fuzzerID].first->lock();
-	for (const auto& e : this->loggersLinks[fuzzerID].second) {
+	for (const auto &e: this->loggersLinks[fuzzerID].second) {
 		for (auto iter = this->loggers.begin(); iter != this->loggers.end(); ++iter) {
 			if (e == iter->second) {
 				fuzzerLoggers.push_back(iter->first);
