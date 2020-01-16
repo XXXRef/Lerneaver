@@ -31,7 +31,7 @@ private:
 
 	template<class TypeEntity, class TypeEntityID> std::shared_ptr<TypeEntity> loadEntityFromModule(const TypeEntityID &entityID, const TYPE_MODID &entityModID) {
 		std::map<TypeEntityID, TYPE_MODID> *entitiesModulesCollection;
-		config::platform::TYPE_FUNCNAME *entityFactoryFuncName;
+		const config::platform::TYPE_FUNCNAME *entityFactoryFuncName;
 		std::string entityName;
 		//TIP logic based on particular entity type
 		if (std::is_same<TypeEntityID, TYPE_FUZZERID>::value == true) { 
@@ -53,14 +53,14 @@ private:
 		try {
 			this->modulesManager.loadModule(entityModID);
 		}
-		catch (CModulesManager::ExModulesManager & e) {
+		catch (CModulesManager::ExModulesManager &e) {
 			throw ExFuzzerModulesManager(e.getInfo());
 		}
-		*entitiesModulesCollection.insert({ entityID,entityModID });
+		entitiesModulesCollection->insert({ entityID,entityModID });
 		//Get entity obj factory function
 		TypeEntity*(*pfnEntityFactoryFunction)();
 		try {
-			pfnEntityFactoryFunction = reinterpret_cast<(TypeEntity*(*)()>(this->modulesManager[entityModID]->getFunctionAddress(*entityFactoryFuncName));
+			pfnEntityFactoryFunction = reinterpret_cast<TypeEntity*(*)()>(this->modulesManager[entityModID]->getFunctionAddress(*entityFactoryFuncName));
 		}
 		catch (CModulesManager::ExModulesManager &e) {
 			throw ExFuzzerModulesManager(e.getInfo());
