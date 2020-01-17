@@ -20,10 +20,10 @@ include_directories("./src" "../Lerneaver/src/inc" "../Lerneaver/src/inc/EXT")
 file(GLOB SRC_FILES "./src/*.cpp")
 
 #Build Lerneaver library
-add_subdirectory("../Lerneaver" "./BUILD") #WARNING Is it permitted? Subproject directory on the same lvl as root project
+add_subdirectory("../Lerneaver" "${CMAKE_CURRENT_BINARY_DIR}/Lerneaver") #TIP generated project files for Lerneaver lib placed in its own "Lerneaver" subdir
 
 #Compile
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 #Link with Lerneaver lib
-target_link_libraries(${PROJECT_NAME} "./BUILD/Lerneaver")
+target_link_libraries(${PROJECT_NAME} "Lerneaver")
