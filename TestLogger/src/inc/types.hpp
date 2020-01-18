@@ -1,7 +1,7 @@
 /**
-\file
+	\file
 
-Module that describes main types.
+	Module that describes main types.
 */
 
 #ifndef HEADER_TYPES
@@ -16,14 +16,6 @@ using TYPE_WORD = std::uint16_t;
 using TYPE_DWORD = std::uint32_t;
 using TYPE_QWORD = std::uint64_t;
 
-using TYPE_SIZE = std::size_t;
-
-#if defined PLATFORM_WINDOWS
-using TYPE_FILESYSTEMPATH = std::wstring;
-#elif defined PLATFORM_UNIX
-using TYPE_FILESYSTEMPATH = std::string;
-#elif defined PLATFORM_MACOS
-
-#endif
+using TYPE_SIZE=std::size_t;
 
 #endif
