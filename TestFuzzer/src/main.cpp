@@ -1,4 +1,4 @@
-#include "fuzzer/fuzzer.hpp"
+#include "fuzzer.hpp"
 
 extern "C" {
 	__declspec(dllexport) IFuzzer* getFuzzer();

@@ -11,8 +11,8 @@ class COutputter: public IOutputter {
 	std::mutex m;
 
 public:
-	void init(const TYPE_FILESYSTEMPATH& cfgFilePath) override;
-	void output(const ByteBlob& par_data = ByteBlob{}) override;
+	void init(const config::TYPE_CONFIGID &cfgFileID) override;
+	void output(const ByteBlob &par_data = ByteBlob{}) override;
 	void deinit() override;
 };
 

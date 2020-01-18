@@ -2,9 +2,9 @@
 
 #include <stdio.h>
 
-void COutputter::init(const TYPE_FILESYSTEMPATH& cfgFilePath) {
+void COutputter::init(const config::TYPE_CONFIGID &cfgFileID) {
 	//Read output file name from cfg file
-	std::ifstream cfgFileIfStream(cfgFilePath, std::ios::in);
+	std::ifstream cfgFileIfStream(cfgFileID, std::ios::in);
 	std::string outputFilePath;
 	std::getline(cfgFileIfStream,outputFilePath);
 	cfgFileIfStream.close();
@@ -13,7 +13,7 @@ void COutputter::init(const TYPE_FILESYSTEMPATH& cfgFilePath) {
 	this->ofStream.open(outputFilePath, std::ios::out | std::ios::binary | std::ios::app);
 }
 
-void COutputter::output(const ByteBlob& par_data) {
+void COutputter::output(const ByteBlob &par_data) {
 	this->m.lock();
 	this->ofStream.write((const char*)&par_data[0],par_data.size());
 	this->m.unlock();
