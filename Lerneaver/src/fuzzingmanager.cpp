@@ -207,7 +207,7 @@ void CFuzzingManager::addOutputter(const TYPE_OUTPUTTERID &outputterID, const TY
 	}
 	std::shared_ptr<IOutputter> pOutputterObj;
 	try{
-	auto pOutputterObj = this->fuzzerModulesContainer.loadOutputterFromModule(outputterID, outputterModID);
+		pOutputterObj = this->fuzzerModulesContainer.loadOutputterFromModule(outputterID, outputterModID);
 	}
 	catch (CFuzzerModulesManager::ExFuzzerModulesManager &e) {
 		this->pLogger->log(spdlog::level::err, std::string("Failed to load outputter module: ") + e.getInfo());
