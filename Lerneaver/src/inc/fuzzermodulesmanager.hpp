@@ -64,7 +64,7 @@ private:
 		try {
 			pfnEntityFactoryFunction = reinterpret_cast<TypeEntity*(*)()>(this->modulesManager[entityModID]->getFunctionAddress(*entityFactoryFuncName));
 		}
-		catch (CModulesManager::ExModulesManager &e) {
+		catch (ExModuleContainer &e) {
 			throw ExFuzzerModulesManager(e.getInfo());
 		}
 		//Acquire outputter obj from factory
