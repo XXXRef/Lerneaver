@@ -5,8 +5,8 @@
 
 class CFuzzer: public IFuzzer {
 public:
-	void init(const TYPE_FILESYSTEMPATH& cfgFilePath) override;
-	ByteBlob gen(const ByteBlob& par_data = ByteBlob{}) override;
+	void init(const config::TYPE_CONFIGID &cfgFileID) override;
+	ByteBlob gen(const ByteBlob &par_data = ByteBlob{}) override;
 	void deinit() override;
 };
 
