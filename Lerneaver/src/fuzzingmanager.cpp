@@ -13,7 +13,7 @@ CFuzzingManager::CFuzzingManager() {
 	//Set logger
 	std::srand(std::time(nullptr));
 	this->fuzzingManagerID = std::rand();
-	auto logger = spdlog::create<spdlog::sinks::null_sink_st>(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
+	this->pLogger = spdlog::create<spdlog::sinks::null_sink_st>(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
 }
 
 //Logging stuff
