@@ -1,4 +1,4 @@
-#include "logger/logger.hpp"
+#include "logger.hpp"
 
 #if defined PLATFORM_WINDOWS
 extern "C" {
