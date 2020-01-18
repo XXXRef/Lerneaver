@@ -25,6 +25,7 @@ message("OiledOwl production..")
 
 #Build Lerneaver
 if(${FLAG_ADD_LERNEAVER}) 
+	set(FLAG_BUILD_LERNEAVER ON)#WARNING KOSTIL'
 	add_subdirectory("./Lerneaver")
 endif()
 
