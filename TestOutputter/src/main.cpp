@@ -3,10 +3,10 @@
 #include "outputter.hpp"
 
 extern "C" {
-	__declspec(dllexport) IOutputter * getOutputter();
+	__declspec(dllexport) IOutputter* getOutputter();
 }
 
-IOutputter * getOutputter() {
+IOutputter* getOutputter() {
 	return new COutputter();
 }
 
