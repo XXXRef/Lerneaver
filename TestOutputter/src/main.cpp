@@ -1,11 +1,12 @@
-#include "outputter/i_outputter.hpp"
-#include "outputter/outputter.hpp"
+#include <windows.h>
+
+#include "outputter.hpp"
 
 extern "C" {
-	__declspec(dllexport) IOutputter* getOutputter();
+	__declspec(dllexport) IOutputter * getOutputter();
 }
 
-IOutputter* getOutputter() {
+IOutputter * getOutputter() {
 	return new COutputter();
 }
 
