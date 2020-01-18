@@ -5,6 +5,7 @@
 #include <set>
 #include <cstdlib>
 #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/null_sink.h"
 
 //CFuzzingManager
 //====================================================================================================
@@ -12,6 +13,7 @@ CFuzzingManager::CFuzzingManager() {
 	//Set logger
 	std::srand(std::time(nullptr));
 	this->fuzzingManagerID = std::rand();
+	auto logger = spdlog::create<spdlog::sinks::null_sink_st>(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
 }
 
 //Logging stuff
