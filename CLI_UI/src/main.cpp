@@ -167,7 +167,7 @@ std::map<CFuzzingManager::EWorkerState, std::string> statesNames = {
 
 			for (const auto &fuzzerState: state) {
 				// {1:fuzzerWorkerState, 2:fuzzerLoggers, 3:fuzzerOutputters}
-				std::cout << L"fuzzerID="; MAINCFG_STD_OUT_OBJ << std::get<0>(fuzzerState) << std::endl;
+				std::cout << "fuzzerID="; MAINCFG_STD_OUT_OBJ << std::get<0>(fuzzerState) << std::endl;
 				
 				std::cout << "\t" << "state=" << ::statesNames[std::get<1>(fuzzerState)] << std::endl;
 				
