@@ -31,22 +31,22 @@ private:
 	std::map<TYPE_LOGGERID, TYPE_MODID> loggersModules;
 	std::map<TYPE_OUTPUTTERID, TYPE_MODID> outputtersModules;
 
-	template<ENTITIES_IDS entityID, class TypeEntity, class TypeEntityID> std::shared_ptr<TypeEntity> loadEntityFromModule(const TypeEntityID &entityID, const TYPE_MODID &entityModID) {
+	template<ENTITIES_IDS entityType, class TypeEntity, class TypeEntityID> std::shared_ptr<TypeEntity> loadEntityFromModule(const TypeEntityID &entityID, const TYPE_MODID &entityModID) {
 		std::map<TypeEntityID, TYPE_MODID> *entitiesModulesCollection;
 		const config::platform::TYPE_FUNCNAME *entityFactoryFuncName;
 		std::string entityName;
 		//TIP logic based on particular entity type
-		if (ENTITIES_IDS::FUZZER == entityID) {
+		if (ENTITIES_IDS::FUZZER == entityType) {
 			entitiesModulesCollection = &this->fuzzersModules; 
 			entityFactoryFuncName = &config::fuzzerFactoryFunctionName;
 			entityName = "fuzzer";
 		}
-		else if (ENTITIES_IDS::LOGGER == entityID) {
+		else if (ENTITIES_IDS::LOGGER == entityType) {
 			entitiesModulesCollection = &this->loggersModules;
 			entityFactoryFuncName = &config::loggerFactoryFunctionName;
 			entityName = "logger";
 		}
-		else if (ENTITIES_IDS::OUTPUTTER == entityID) {
+		else if (ENTITIES_IDS::OUTPUTTER == entityType) {
 			entitiesModulesCollection = &this->outputtersModules;
 			entityFactoryFuncName = &config::outputterFactoryFunctionName;
 			entityName = "outputter";
@@ -73,12 +73,12 @@ private:
 		return pEntityObj;
 	}
 
-	template<ENTITIES_IDS entityID, class TypeEntityID> void unloadEntity(const TypeEntityID &entityID) {
+	template<ENTITIES_IDS entityType, class TypeEntityID> void unloadEntity(const TypeEntityID &entityID) {
 		std::map<TypeEntityID, TYPE_MODID>* entitiesModulesCollection;
 		//TIP logic based on particular entity type
-		if (ENTITIES_IDS::FUZZER == entityID) entitiesModulesCollection = &this->fuzzersModules;
-		else if (ENTITIES_IDS::LOGGER == entityID) entitiesModulesCollection = &this->loggersModules;
-		else if (ENTITIES_IDS::OUTPUTTER == entityID) entitiesModulesCollection = &this->outputtersModules;
+		if (ENTITIES_IDS::FUZZER == entityType) entitiesModulesCollection = &this->fuzzersModules;
+		else if (ENTITIES_IDS::LOGGER == entityType) entitiesModulesCollection = &this->loggersModules;
+		else if (ENTITIES_IDS::OUTPUTTER == entityType) entitiesModulesCollection = &this->outputtersModules;
 		try {
 			this->modulesManager.unloadModule((*entitiesModulesCollection)[entityID]);
 		}
@@ -105,7 +105,7 @@ public:
 		return this->loadEntityFromModule<ENTITIES_IDS::OUTPUTTER,IOutputter>(outputterID, outputterModID);
 	}
 	void unloadOutputter(const TYPE_OUTPUTTERID &outputterID) {
-		this->unloadEntity<ENTITIES_IDS::LOGGER>(outputterID);
+		this->unloadEntity<ENTITIES_IDS::OUTPUTTER>(outputterID);
 	}
 
 //Exceptions
