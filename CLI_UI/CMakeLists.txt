@@ -20,7 +20,9 @@ include_directories("./src" "../Lerneaver/src/inc" "../Lerneaver/src/inc/EXT")
 file(GLOB SRC_FILES "./src/*.cpp")
 
 #Build Lerneaver library
-add_subdirectory("../Lerneaver" "${CMAKE_CURRENT_BINARY_DIR}/Lerneaver") #TIP generated project files for Lerneaver lib placed in its own "Lerneaver" subdir
+if(NOT DEFINED FLAG_BUILD_LERNEAVER) #TODO KOSTIL'
+	add_subdirectory("../Lerneaver" "${CMAKE_CURRENT_BINARY_DIR}/Lerneaver") #TIP generated project files for Lerneaver lib placed in its own "Lerneaver" subdir
+endif()
 
 #Compile
 add_executable(${PROJECT_NAME} ${SRC_FILES})
