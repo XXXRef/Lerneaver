@@ -164,7 +164,7 @@ void outputCaption() {
 	// Handle user input
 	MAINCFG_STRTYPE userInputString;
 	while (true) {
-		std::cout << "> ";//TIP we can mix std::cout and std::wcout usage
+		std::cout << ">>>";//TIP we can mix std::cout and std::wcout usage
 		std::getline(MAINCFG_STD_IN_OBJ, userInputString);
 		STRSTREAM strStream(userInputString);
 		MAINCFG_STRTYPE firstWord;
