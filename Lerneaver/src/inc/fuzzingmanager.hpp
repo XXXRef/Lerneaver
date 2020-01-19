@@ -77,6 +77,7 @@ public:
 	using EWorkerState=CFuzzingManager::CWorker::EWorkerState;
 
 	CFuzzingManager();
+	virtual ~CFuzzingManager();
 
 	//Logging stuff
 	void enableLogging(const config::platform::TYPE_FILESYSTEMPATH &logFilePath);

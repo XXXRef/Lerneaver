@@ -16,6 +16,15 @@ CFuzzingManager::CFuzzingManager() {
 	this->pLogger = spdlog::create<spdlog::sinks::null_sink_st>(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
 }
 
+CFuzzingManager::~CFuzzingManager() {
+	//Remove all remaining fuzzers	
+	//Get all fuzzers IDs
+	std::vector<decltype(this->fuzzers)::key_type> fuzzersIDs(this->fuzzers.size());
+	decltype(this->fuzzers)::size_type i = 0;
+	for (auto iter = this->fuzzers.cbegin(); iter != this->fuzzers.cend(); ++iter) fuzzersIDs[i++] = iter->first;
+	for (const auto& e : fuzzersIDs) this->removeFuzzer(e);
+}
+
 //Logging stuff
 //====================================================================================================
 void CFuzzingManager::enableLogging(const config::platform::TYPE_FILESYSTEMPATH &logFilePath) {
