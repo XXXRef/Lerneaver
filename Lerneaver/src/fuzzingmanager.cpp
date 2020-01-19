@@ -75,17 +75,26 @@ void CFuzzingManager::removeFuzzer(const TYPE_FUZZERID &fuzzerID) {
 		this->pLogger->log(spdlog::level::err, "Fuzzer with given fuzzerID doesnt exist");
 		throw ExFuzzingManager("Fuzzer with given fuzzerID doesnt exist");
 	}
-	try{
+
+	//Stop fuzzer
+	//TIP stop not deinit or something else. User cant do it himself by appropriate command. If fuzzer is playing while its removing all that needed is to make sure fuzzer correctly removed
+	if (EWorkerState::PLAYING == this->workers[fuzzerID].first->getState()) {
+		this->workers[fuzzerID].first->setState(CWorker::EWorkerState::STOPPED);
+		this->workers[fuzzerID].second.join();
+	}
+	this->workers.erase(fuzzerID);
+	this->fuzzers.erase(fuzzerID);
+	this->links.erase(fuzzerID);
+	this->loggersLinks.erase(fuzzerID);
+
+	try {
 		this->fuzzerModulesContainer.unloadFuzzer(fuzzerID);
 	}
-	catch (CFuzzerModulesManager::ExFuzzerModulesManager &e) {
+	catch (CFuzzerModulesManager::ExFuzzerModulesManager & e) {
 		this->pLogger->log(spdlog::level::err, std::string("Failed to unload fuzzer module: ") + e.getInfo());
 		throw ExFuzzingManager(e.getInfo());
 	}
-	//TODO Stop/deinit fuzzer?
-	this->fuzzers.erase(fuzzerID);
-	this->links.erase(fuzzerID);
-	//TODO this->loggersLinks.erase(fuzzerID);
+
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::removeFuzzer END");
 }
 
