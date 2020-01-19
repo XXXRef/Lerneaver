@@ -22,7 +22,18 @@ CFuzzingManager::~CFuzzingManager() {
 	std::vector<decltype(this->fuzzers)::key_type> fuzzersIDs(this->fuzzers.size());
 	decltype(this->fuzzers)::size_type i = 0;
 	for (auto iter = this->fuzzers.cbegin(); iter != this->fuzzers.cend(); ++iter) fuzzersIDs[i++] = iter->first;
-	for (const auto& e : fuzzersIDs) this->removeFuzzer(e);
+	for (const auto &e: fuzzersIDs) {
+		//Stop fuzzer if its playing
+		if (EWorkerState::PLAYING == this->workers[e].first->getState()) {
+			this->workers[e].first->setState(EWorkerState::STOPPED);
+			this->workers[e].second.join();
+		}
+		this->workers.erase(e);
+		this->fuzzers.erase(e);
+		this->links.erase(e);
+		this->loggersLinks.erase(e);
+		this->fuzzerModulesContainer.unloadFuzzer(e);
+	}
 	//Cleanup logging
 	spdlog::drop(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
 }
@@ -93,8 +104,8 @@ void CFuzzingManager::removeFuzzer(const TYPE_FUZZERID &fuzzerID) {
 	//Stop fuzzer
 	//TIP stop not deinit or something else. User cant do it himself by appropriate command. If fuzzer is playing while its removing all that needed is to make sure fuzzer correctly removed
 	if (EWorkerState::PLAYING == this->workers[fuzzerID].first->getState()) {
-		this->workers[fuzzerID].first->setState(CWorker::EWorkerState::STOPPED);
-		this->workers[fuzzerID].second.join();
+		this->pLogger->log(spdlog::level::err, "Attempted to remove playing fuzzer. Stop it before removing");
+		throw ExFuzzingManager("Attempted to remove playing fuzzer. Stop it before removing");
 	}
 	this->workers.erase(fuzzerID);
 	this->fuzzers.erase(fuzzerID);
@@ -127,8 +138,14 @@ void CFuzzingManager::initFuzzer(const TYPE_FUZZERID &fuzzerID, const TYPE_CONFI
 		this->pLogger->log(spdlog::level::err, "Fuzzer with given fuzzerID doesnt exist");
 		throw ExFuzzingManager("Fuzzer with given fuzzerID doesnt exist");
 	}
+	//Check if fuzzer is playing
+	if (EWorkerState::PLAYING == this->workers[fuzzerID].first->getState()) {
+		this->pLogger->log(spdlog::level::err, "Attempted to init playing fuzzer. Stop it before initializing");
+		throw ExFuzzingManager("Attempted to init playing fuzzer. Stop it before initializing");
+	}
 	//Init fuzzer
 	this->fuzzers[fuzzerID]->init(cfgFileID);
+	this->workers[fuzzerID].first->setState(EWorkerState::INITIALIZED);
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::initFuzzer END");
 }
 
@@ -148,8 +165,14 @@ void CFuzzingManager::deinitFuzzer(const TYPE_FUZZERID &fuzzerID) {
 		this->pLogger->log(spdlog::level::err, "Fuzzer with given fuzzerID doesnt exist");
 		throw ExFuzzingManager("Fuzzer with given fuzzerID doesnt exist");
 	}
+	//Check if fuzzer is playing
+	if (EWorkerState::PLAYING == this->workers[fuzzerID].first->getState()) {
+		this->pLogger->log(spdlog::level::err, "Attempted to deinit playing fuzzer. Stop it before deinitializing");
+		throw ExFuzzingManager("Attempted to deinit playing fuzzer. Stop it before deinitializing");
+	}
 	//Deinit fuzzer
 	this->fuzzers[fuzzerID]->deinit();
+	this->workers[fuzzerID].first->setState(EWorkerState::DEINITIALIZED);
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::deinitFuzzer END");
 }
 
