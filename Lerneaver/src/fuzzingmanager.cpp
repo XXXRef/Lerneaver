@@ -497,9 +497,14 @@ void CFuzzingManager::addFuzzerLogger(const TYPE_FUZZERID &fuzzerID, const TYPE_
 		this->pLogger->log(spdlog::level::err, "Logger with given loggerID doesnt exist");
 		throw ExFuzzingManager("Logger with given loggerID doesnt exist");
 	}
-
 	auto pLoggerObj = this->loggers[loggerID];
+	//Check if logger already linked to fuzzer
 	this->loggersLinks[fuzzerID].first->lock();
+	if (std::find(this->loggersLinks[fuzzerID].second.cbegin(), this->loggersLinks[fuzzerID].second.cend(), pLoggerObj) != this->loggersLinks[fuzzerID].second.cend()) { //TODO This is bullshit to compare find by shared ptrs. loggersLinks must contain linked loggers IDs
+		this->loggersLinks[fuzzerID].first->unlock();
+		this->pLogger->log(spdlog::level::err, "Logger with given loggerID is already linked to this fuzzer");
+		throw ExFuzzingManager("Logger with given loggerID is already linked to this fuzzer");
+	}
 	this->loggersLinks[fuzzerID].second.push_back(pLoggerObj);
 	this->loggersLinks[fuzzerID].first->unlock();
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::setFuzzerLoggers END");
@@ -627,9 +632,14 @@ void CFuzzingManager::addFuzzerOutputter(const TYPE_FUZZERID &fuzzerID, const TY
 		this->pLogger->log(spdlog::level::err, "Outputter with given outputterID doesnt exist");
 		throw ExFuzzingManager("Outputter with given outputterID doesnt exist");
 	}
-	
 	auto pOutputterObj = this->outputters[outputterID];
+	//Check if outputter already linked to fuzzer
 	this->links[fuzzerID].first->lock();
+	if (std::find(this->links[fuzzerID].second.cbegin(), this->links[fuzzerID].second.cend(), pOutputterObj) != this->links[fuzzerID].second.cend()) { //TODO This is bullshit to compare find by shared ptrs. links must contain linked loggers IDs
+		this->links[fuzzerID].first->unlock();
+		this->pLogger->log(spdlog::level::err, "Outputter with given outputterID is already linked to this fuzzer");
+		throw ExFuzzingManager("Outputter with given outputterID is already linked to this fuzzer");
+	}
 	this->links[fuzzerID].second.push_back(pOutputterObj);
 	this->links[fuzzerID].first->unlock();
 	this->pLogger->log(spdlog::level::debug, "CFuzzingManager::setFuzzerOutputters END");
