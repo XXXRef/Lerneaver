@@ -157,6 +157,7 @@ void outputCaption() {
 #endif
 
 	CFuzzingManager fuzzingManager;
+	fuzzingManager.enableLogging("lerneaver_log.log");
 
 	outputCaption();
 
