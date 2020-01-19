@@ -13,6 +13,8 @@ CLI_UI main module
 
 #include "types.hpp"
 
+#define MAINCFG_LERNEAVER_CLI_VERSION "0.9"
+
 #if defined PLATFORM_WINDOWS
 	using MAINCFG_STRTYPE=std::string;
 	#define MAINCFG_STD_IN_OBJ std::cin
@@ -132,6 +134,21 @@ std::map<CFuzzingManager::EWorkerState, std::string> statesNames = {
 	{ CFuzzingManager::EWorkerState::INTERRUPTED, "INTERRUPTED" }
 };
 
+void outputCaption() {
+	std::cout << "====================================================" << std::endl;
+	std::cout << "        _                                             " << std::endl;
+	std::cout << "       | |___ __ _  __ _ ___  _ ____   _____ __ _     " << std::endl;
+	std::cout << "       | / _ |__` |/ _` / _ \| '_ \ \ / / _ |__` |    " << std::endl;
+	std::cout << "    ___| \__  | | | | | \__  | |_) \ V /\__  | | |    " << std::endl;
+	std::cout << "   |_____|___/  |_|_| |_|___/|_.__/ \_/ |___/  |_|    " << std::endl;
+	std::cout << "                                                      " << std::endl;
+	std::cout << "                                                      " << std::endl;
+	std::cout << "   Lerneaver CLI  v: " << MAINCFG_LERNEAVER_CLI_VERSION << std::endl;
+	std::cout << "                                                      " << std::endl;
+	std::cout << "====================================================" << std::endl;
+	std::cout << std::endl;
+}
+
 //Usage: FuzzingFramework cfg_filePath. cfg_filePath implied to be wide string
 #if defined PLATFORM_WINDOWS
 	int wmain(int argc, wchar_t** argv) {
@@ -140,6 +157,8 @@ std::map<CFuzzingManager::EWorkerState, std::string> statesNames = {
 #endif
 
 	CFuzzingManager fuzzingManager;
+
+	outputCaption();
 
 	// Handle user input
 	MAINCFG_STRTYPE userInputString;
