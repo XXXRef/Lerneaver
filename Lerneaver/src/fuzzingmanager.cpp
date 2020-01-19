@@ -23,18 +23,23 @@ CFuzzingManager::~CFuzzingManager() {
 	decltype(this->fuzzers)::size_type i = 0;
 	for (auto iter = this->fuzzers.cbegin(); iter != this->fuzzers.cend(); ++iter) fuzzersIDs[i++] = iter->first;
 	for (const auto& e : fuzzersIDs) this->removeFuzzer(e);
+	//Cleanup logging
+	spdlog::drop(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
 }
 
 //Logging stuff
 //====================================================================================================
 void CFuzzingManager::enableLogging(const config::platform::TYPE_FILESYSTEMPATH &logFilePath) {
+	spdlog::drop(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
 	this->pLogger = spdlog::basic_logger_st(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID), logFilePath);
 	this->pLogger->set_level(spdlog::level::debug);
 }
 
 //====================================================================================================
 void CFuzzingManager::disableLogging() {
-	this->pLogger->set_level(spdlog::level::off);
+	spdlog::drop(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
+	this->pLogger = spdlog::create<spdlog::sinks::null_sink_st>(std::string("logger_Lerneaver_") + std::to_string(this->fuzzingManagerID));
+	//this->pLogger->set_level(spdlog::level::off);
 }
 
 //Fuzzer-related interface
