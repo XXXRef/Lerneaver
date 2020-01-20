@@ -1,7 +1,7 @@
 ﻿<p align="center"> <h1 align="center">🐉   Lerneaver   🐉</h1> </p>
 <p align="center"> <img align="center" src="https://xxxref.com/wp-content/uploads/2020/01/lerneaver_logo.png"> </p>
 Crossplatform dynamic fuzzing framework for supermans
-Current version: 
+Current version: 1.0
 
 ## Table of contents
 - [What is it](#what-is-it)

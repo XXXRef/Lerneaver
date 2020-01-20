@@ -1,6 +1,8 @@
 #ifndef HEADER_FUZZINGMANAGER
 #define HEADER_FUZZINGMANAGER
 
+//VERSION: 1.0
+
 #include <string>
 #include <memory>
 #include <map>
