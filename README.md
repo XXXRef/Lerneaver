@@ -1,6 +1,8 @@
 ﻿<p align="center"> <h1 align="center">🐉   Lerneaver   🐉</h1> </p>
 <p align="center"> <img align="center" src="https://xxxref.com/wp-content/uploads/2020/01/lerneaver_logo.png"> </p>
-Crossplatform dynamic fuzzing framework for supermans
+
+**Lerneaver** - crossplatform dynamic fuzzing framework for supermans
+
 Current version: 1.0
 
 ## Table of contents
@@ -11,8 +13,13 @@ Current version: 1.0
 - [How to use](#how-to-use)
 
 ## **What is it**
-**Lerneaver** is the thing that makes fuzzing process a joy. Lets dont rant about concurrency, platfrom independency, modularity, changing entities state/set on the fly - its obvious that **Lerneaver** has its all and many more, we'll just watch closer how it works.
-There are 3 main types of entities in **Lerneaver** system: fuzzer, logger, outputter.  Fuzzer is the thing that generates data, runs in its own thread and is able to init/deinit/stop/resume. Logger somehow processes this data and stores it somewhere (file, stream, mailslot, whatever). And outputter transfers fuzz buffer to target, maybe after some its postprocessing. Its assumed that each entity object (fuzzer/logger/outputter) loaded from its own module (we wont talk about modularity and rebuilding structure during runtime you still remember?).
+**Lerneaver** is the thing that makes fuzzing process a joy. Let's dont rant about concurrency, platfrom independency, modularity, changing entities state/set on the fly - its obvious that **Lerneaver** has them all and many more, we'll just watch closer on how it works.
+There are 3 main types of entities in **Lerneaver** system: 
+- Fuzzer 
+- Logger
+- Outputter
+
+Fuzzer is the thing that generates data, runs in its own thread and is able to init/deinit/stop/resume. Logger somehow processes this data and stores it somewhere (file, stream, mailslot, whatever). And outputter transfers fuzz buffer to target, possibly after some its' postprocessing. It's assumed that each entity object (fuzzer/logger/outputter) is loaded from its' own module (we wont talk about modularity and rebuilding structure during runtime you still remember?).
 So all you need to become fuzz superstar is to implement business logic of your fuzzers/loggers/outputters through convinient interfaces and then see your victims constantly crash cos of monstrous fuzzing speed ;3
 
 I like to make shemes, so i visualized basic **Lerneaver** workflow:
@@ -36,7 +43,7 @@ cmake ..
 All subprojects will be produced. Ofc you can build **Lerneaver** lib / **Lerneaver** CLI / test modules separately. Or by manipulating *FLAG_ADD_LERNEAVER/FLAG_ADD_CLI_UI/FLAG_ADD_TESTFUZZER/FLAG_ADD_TESTLOGGER/FLAG_ADD_TESTOUTPUTTER* CMake build options.
 
 **NOTES:**
-- For now only x86-Debug build configuration tested
+- For now only "*x86-Debug*" build configuration tested
 
 ## **How to use**
 **Creating entities**
@@ -67,9 +74,9 @@ ADD <fuzzerID> <fuzzer_module_path>
 ```
 RM <fuzzerID>
 ```
-- Init fuzzer with fuzzer ID = < fuzzerID > and from config file with path = < cfg_file_path >
+- Init fuzzer with fuzzer ID = < fuzzerID > and from config file with path = < fuzzer_cfg_file_path >
 ```
-INIT <fuzzerID> <cfg_file_path>
+INIT <fuzzerID> <fuzzer_cfg_file_path>
 ```
 - Deinit fuzzer with fuzzer ID = < fuzzerID >
 ```
@@ -91,9 +98,9 @@ ADD_LOGGER <loggerID> <logger_module_path>
 ```
 RM_LOGGER <loggerID>
 ```
-- Init logger with logger ID = < loggerID > and from config file with path = < cfg_file_path >
+- Init logger with logger ID = < loggerID > and from config file with path = < logger_cfg_file_path >
 ```
-INIT_LOGGER <loggerID> <cfg_file_path>
+INIT_LOGGER <loggerID> <logger_cfg_file_path>
 ```
 - Deinit logger with logger ID = < loggerID >
 ```
@@ -103,11 +110,11 @@ DEINIT_LOGGER <loggerID>
 ```
 LINK_LOGGER <fuzzerID> <loggerID>
 ```
-- Unink logger with logger ID = < loggerID > from fuzzer with fuzzer ID = < fuzzerID >
+- Unlink logger with logger ID = < loggerID > from fuzzer with fuzzer ID = < fuzzerID >
 ```
 UNLINK_LOGGER <fuzzerID> <loggerID>
 ```
-- Add outputter with outputter ID = < outputterID > (simply string) and from module with path = < outputterer_module_path >
+- Add outputter with outputter ID = < outputterID > (simply string) and from module with path = < outputter_module_path >
 ```
 ADD_OUTPUTTER <outputterID> <outputter_module_path>
 ```
@@ -115,9 +122,9 @@ ADD_OUTPUTTER <outputterID> <outputter_module_path>
 ```
 RM_OUTPUTTER <outputterID>
 ```
-- Init outputter with outputter ID = < outputterID > and from config file with path = < cfg_file_path >
+- Init outputter with outputter ID = < outputterID > and from config file with path = < outputter_cfg_file_path >
 ```
-INIT_OUTPUTTER <outputterID> <cfg_file_path>
+INIT_OUTPUTTER <outputterID> <outputter_cfg_file_path>
 ```
 - Deinit outputter with outputter ID = < outputterID >
 ```
@@ -131,7 +138,7 @@ LINK_OUTPUTTER <fuzzerID> <outputterID>
 ```
 UNLINK_OUTPUTTER <fuzzerID> <outputterID>
 ```
-- Get fuzzers info
+- Get fuzzers info (states, linked loggers, linked outputters)
 ```
 LS
 ```
